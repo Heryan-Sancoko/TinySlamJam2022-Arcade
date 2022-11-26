@@ -1,3 +1,8 @@
 Library/
 Temp/
 Logs/
+obj/Debug
+*.suo
+*.suo~Stashed changes
+.vs/
+UserSettings/

@@ -11,7 +11,7 @@ public enum critterState
     launched
 }
 
-public class CritterBehaviour : EntityBehaviour
+public class CritterBehaviour : WanderingBehaviour
 {
 
     public CritterObject mCritterObject;
@@ -22,8 +22,13 @@ public class CritterBehaviour : EntityBehaviour
     private float launchMaxDuration = 0.5f;
     private float launchCurDuration = 0;
     private HeroBehaviour mHero;
-    private Vector3 wanderDestination;
-    private 
+    private List<ProjectileBehaviour> listOfBullets = new List<ProjectileBehaviour>();
+    [SerializeField]
+    private ProjectileBehaviour bulletPrefab;
+    [SerializeField]
+    private float shootMaxCooldown = 0.2f;
+    private float shootCurCooldown = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +40,8 @@ public class CritterBehaviour : EntityBehaviour
     // Update is called once per frame
     void Update()
     {
+        shootCurCooldown -= Time.deltaTime;
+
         switch (currentState)
         {
             case critterState.held:
@@ -52,6 +59,14 @@ public class CritterBehaviour : EntityBehaviour
                 }
                 break;
             case critterState.wander:
+                WanderRandomly();
+                if (rbody.velocity.magnitude == 0)
+                    currentState = critterState.idle;
+                break;
+            case critterState.idle:
+                WanderRandomly();
+                if (rbody.velocity.magnitude > 0)
+                    currentState = critterState.wander;
                 break;
             default:
                 break;
@@ -59,7 +74,39 @@ public class CritterBehaviour : EntityBehaviour
 
     }
 
+    public void Shoot()
+    {
+        if (shootCurCooldown <= 0)
+        {
+            if (listOfBullets == null)
+            {
+                listOfBullets = new List<ProjectileBehaviour>();
+            }
 
+            ProjectileBehaviour newBullet = listOfBullets.Find(x => x.gameObject.activeSelf == false);
+
+            if (newBullet == null)
+            {
+                newBullet = Instantiate(bulletPrefab, transform.position + transform.forward, transform.rotation);
+                listOfBullets.Add(newBullet);
+            }
+            else
+            {
+                newBullet.transform.position = transform.position + transform.forward;
+                newBullet.transform.rotation = transform.rotation;
+                newBullet.gameObject.SetActive(true);
+            }
+            shootCurCooldown = shootMaxCooldown;
+        }
+    }
+
+    public void PickupCritter()
+    {
+        currentState = critterState.held;
+        launchCurDuration = 0;
+        mAnim.SetBool("isLaunched", false);
+
+    }
 
     public void LaunchCritter()
     {
@@ -67,5 +114,17 @@ public class CritterBehaviour : EntityBehaviour
         launchCurDuration = launchMaxDuration;
         rbody.velocity = transform.forward * launchVelocity;
         mAnim.SetBool("isLaunched", true);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == 7)
+        {
+            if (currentState == critterState.wander)
+            {
+                wanderdirConfigureCooldown = 0;
+                RandomizeWanderDirection(collision.contacts[0].normal);
+            }
+        }
     }
 }

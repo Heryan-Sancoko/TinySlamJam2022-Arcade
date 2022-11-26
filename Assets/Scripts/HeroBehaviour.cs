@@ -82,6 +82,15 @@ public class HeroBehaviour : EntityBehaviour
     {
         Move();
         Look();
+        Shoot();
+    }
+
+    private void Shoot()
+    {
+        if (fire.WasReleasedThisFrame() && heldCritter != null)
+        {
+            heldCritter.Shoot();
+        }
     }
 
     private void ThrowHeld()
@@ -111,13 +120,18 @@ public class HeroBehaviour : EntityBehaviour
                     if (Vector3.Distance(transform.position, newCritter.transform.position) < pickupRange &&
                         pickUpThrow.WasReleasedThisFrame())
                     {
-                        heldCritter = newCritter;
-                        newCritter.currentState = critterState.held;
+                        PickupCritter(newCritter);
                     }
                 }
             }
             RotateToMousePosition();
         }
+    }
+
+    private void PickupCritter(CritterBehaviour newCritter)
+    {
+        heldCritter = newCritter;
+        newCritter.PickupCritter();
     }
 
     private void Move()
@@ -196,4 +210,14 @@ public class HeroBehaviour : EntityBehaviour
         isDashing = true;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == 6 && heldCritter==null)
+        {
+            if (collision.gameObject.TryGetComponent(out CritterBehaviour newCritter))
+            {
+                PickupCritter(newCritter);
+            }
+        }
+    }
 }
