@@ -140,5 +140,7 @@ public class CritterBehaviour : WanderingBehaviour
                 RandomizeWanderDirection(collision.contacts[0].normal);
             }
         }
+
+        //if (collision.gameObject.layer == )
     }
 }
