@@ -63,6 +63,7 @@
     <Compile Include="Assets\Scripts\Critters\CritterObject.cs" />
     <Compile Include="Assets\Scripts\HeroManager.cs" />
     <Compile Include="Assets\Scripts\ProjectileBehaviour.cs" />
+    <Compile Include="Assets\Scripts\WanderingBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scripts\Behaviours.asmdef" />

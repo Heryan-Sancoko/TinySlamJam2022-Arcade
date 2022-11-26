@@ -7,4 +7,6 @@ public class EntityBehaviour : MonoBehaviour
     protected float maxHealth;
     protected float currentHealth;
     protected Rigidbody rbody;
+
+
 }

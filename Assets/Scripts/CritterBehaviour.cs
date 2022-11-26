@@ -11,7 +11,7 @@ public enum critterState
     launched
 }
 
-public class CritterBehaviour : EntityBehaviour
+public class CritterBehaviour : WanderingBehaviour
 {
 
     public CritterObject mCritterObject;
@@ -22,7 +22,6 @@ public class CritterBehaviour : EntityBehaviour
     private float launchMaxDuration = 0.5f;
     private float launchCurDuration = 0;
     private HeroBehaviour mHero;
-    private Vector3 wanderDestination;
     private List<ProjectileBehaviour> listOfBullets = new List<ProjectileBehaviour>();
     [SerializeField]
     private ProjectileBehaviour bulletPrefab;
@@ -60,6 +59,14 @@ public class CritterBehaviour : EntityBehaviour
                 }
                 break;
             case critterState.wander:
+                WanderRandomly();
+                if (rbody.velocity.magnitude == 0)
+                    currentState = critterState.idle;
+                break;
+            case critterState.idle:
+                WanderRandomly();
+                if (rbody.velocity.magnitude > 0)
+                    currentState = critterState.wander;
                 break;
             default:
                 break;
@@ -93,6 +100,13 @@ public class CritterBehaviour : EntityBehaviour
         }
     }
 
+    public void PickupCritter()
+    {
+        currentState = critterState.held;
+        launchCurDuration = 0;
+        mAnim.SetBool("isLaunched", false);
+
+    }
 
     public void LaunchCritter()
     {
@@ -100,5 +114,17 @@ public class CritterBehaviour : EntityBehaviour
         launchCurDuration = launchMaxDuration;
         rbody.velocity = transform.forward * launchVelocity;
         mAnim.SetBool("isLaunched", true);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == 7)
+        {
+            if (currentState == critterState.wander)
+            {
+                wanderdirConfigureCooldown = 0;
+                RandomizeWanderDirection(collision.contacts[0].normal);
+            }
+        }
     }
 }
