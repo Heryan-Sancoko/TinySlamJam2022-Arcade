@@ -23,7 +23,9 @@ public class CritterBehaviour : EntityBehaviour
     private float launchCurDuration = 0;
     private HeroBehaviour mHero;
     private Vector3 wanderDestination;
-    private 
+    private List<ProjectileBehaviour> listOfBullets = new List<ProjectileBehaviour>();
+    [SerializeField]
+    private GameObject bulletPrefab;
 
     // Start is called before the first frame update
     void Start()
@@ -59,6 +61,20 @@ public class CritterBehaviour : EntityBehaviour
 
     }
 
+    public void Shoot()
+    {
+        if (listOfBullets == null)
+        {
+            listOfBullets = new List<ProjectileBehaviour>();
+        }
+
+        ProjectileBehaviour newBullet = listOfBullets.Find(x => x.gameObject.activeSelf == false);
+
+        if (newBullet == null)
+        {
+            //newBullet = Instantiate(bulletPrefab,transform.position+transform.forward,transform.rotation);
+        }
+    }
 
 
     public void LaunchCritter()
