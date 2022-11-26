@@ -11,7 +11,8 @@ public class CritterObject : ScriptableObject
     public float shotsPerSecond;
 
     //time before critter jumps out of the pen
-    public float impatience;
+    public float patience;
+    public float patienceRange;
 
     public AnimatorOverrideController mAnimController;
     public GameObject critterObj;

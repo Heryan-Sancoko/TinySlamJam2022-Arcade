@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class WanderingBehaviour : EntityBehaviour
 {
+    [SerializeField]
+    protected bool dontIdleWhileWandering = false;
     protected Vector3 wanderDirection;
     [SerializeField]
     protected float maxWanderTime;
@@ -34,7 +36,7 @@ public class WanderingBehaviour : EntityBehaviour
         else
             wanderTimer -= Time.deltaTime;
 
-        if (wanderIntent == 1)
+        if (wanderIntent == 1 || dontIdleWhileWandering)
         {
             isMoving = true;
             Vector3 newDirection = Vector3.RotateTowards(transform.forward, wanderDirection, (currentMoveSpeed*3)*Time.deltaTime, 0.0f);
