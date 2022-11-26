@@ -28,7 +28,11 @@ public class CritterBehaviour : WanderingBehaviour
     [SerializeField]
     private float shootMaxCooldown = 0.2f;
     private float shootCurCooldown = 0;
-    
+
+    private Coroutine penningRoutine;
+    private bool isAroundPen = false;
+    private float patienceTimer;
+    private PenBehaviour creaturePen;
     
 
 
@@ -69,22 +73,39 @@ public class CritterBehaviour : WanderingBehaviour
                 break;
 
             case critterState.wander:
-                WanderRandomly();
-                if (wanderDirection == Vector3.zero)
-                    currentState = critterState.idle;
+                if (penningRoutine == null)
+                {
+                    WanderRandomly();
+                    if (wanderDirection == Vector3.zero)
+                        currentState = critterState.idle;
+                }
                 break;
 
             case critterState.idle:
-                WanderRandomly();
-                if (wanderDirection != Vector3.zero)
-                    currentState = critterState.wander;
+                if (penningRoutine == null)
+                {
+                    WanderRandomly();
+                    if (wanderDirection != Vector3.zero)
+                        currentState = critterState.wander;
+                }
                 break;
 
             default:
                 break;
         }
 
-        mAnim.SetBool("isMoving", (rbody.velocity.magnitude > 0 && currentState!= critterState.held));
+        if (isPenned)
+        {
+            patienceTimer -= Time.deltaTime;
+            if (patienceTimer <= 0)
+            {
+                if (penningRoutine == null)
+                    penningRoutine = StartCoroutine(UnpenSelf());
+            }
+        }
+
+            mAnim.SetBool("isMoving", (rbody.velocity.magnitude > 0 && currentState!= critterState.held));
+
 
     }
 
@@ -116,14 +137,24 @@ public class CritterBehaviour : WanderingBehaviour
 
     public void PickupCritter()
     {
+        if (penningRoutine != null)
+        {
+            StopCoroutine(penningRoutine);
+            penningRoutine = null;
+        }
+
+        mAnim.SetBool("isGrounded", true);
+
         currentState = critterState.held;
         launchCurDuration = 0;
         mAnim.SetBool("isLaunched", false);
+        isPenned = false;
 
     }
 
     public void LaunchCritter()
     {
+        OnTriggerExit(GameScoreManager.Instance.creaturePen.penTrigger);
         currentState = critterState.launched;
         launchCurDuration = launchMaxDuration;
         rbody.velocity = transform.forward * launchVelocity;
@@ -141,33 +172,135 @@ public class CritterBehaviour : WanderingBehaviour
             }
         }
 
+        if (collision.gameObject.layer == 12)
+        {
+            if (!isPenned)
+            {
+                if (currentState == critterState.launched)
+                {
+                    if (penningRoutine == null)
+                        penningRoutine = StartCoroutine(GetPenned());
+                }
+            }
+        }
+
+        if (collision.gameObject.layer == 3)
+        {
+            mAnim.SetBool("isGrounded", true);
+        }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.layer == 12)
+        {
+            if (!isPenned)
+            {
+                if (currentState == critterState.launched)
+                {
+                    if (penningRoutine == null)
+                        penningRoutine = StartCoroutine(GetPenned());
+                }
+            }
+        }
+
+        if (collision.gameObject.layer == 3)
+        {
+            mAnim.SetBool("isGrounded", true);
+        }
+    }
+
+
+    private void OnTriggerExit(Collider other)
+    {
+        isAroundPen = false;
+        isPenned = false;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+
+        if (other.gameObject.layer == 12)
+        {
+            isAroundPen = true;
+            if (currentState == critterState.launched)
+            {
+                if (penningRoutine==null)
+                penningRoutine = StartCoroutine(GetPenned());
+            }
+        }
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == 12)
         {
+            isAroundPen = true;
             if (currentState == critterState.launched)
             {
-                isPenned = true;
-                StartCoroutine(GetPenned());
+                if (penningRoutine == null)
+                    penningRoutine = StartCoroutine(GetPenned());
             }
         }
     }
 
     private IEnumerator GetPenned()
     {
-        PenBehaviour creaturePen = GameScoreManager.Instance.creaturePen;
+        isPenned = true;
+        patienceTimer = Random.Range(mCritterObject.patience - mCritterObject.patienceRange, mCritterObject.patience + mCritterObject.patienceRange);
+        if (creaturePen==null)
+        creaturePen = GameScoreManager.Instance.creaturePen;
+
+        creaturePen.ScorePoint();
+        transform.LookAt(creaturePen.transform.position);
         float jumpHeight = transform.position.y + 5;
         float originalHeight = transform.position.y;
+        mAnim.SetBool("isGrounded", false);
+        mAnim.SetTrigger("Jump");
 
-        while (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(creaturePen.transform.position.x, creaturePen.transform.position.z)) > 0.1f)
+        while (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(creaturePen.transform.position.x, creaturePen.transform.position.z)) > 1f)
         {
+            wanderDirection = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
-            transform.position = Vector3.Lerp(transform.position, new Vector3(creaturePen.transform.position.x, transform.position.y, creaturePen.transform.position.z), 0.1f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(creaturePen.transform.position.x, transform.position.y, creaturePen.transform.position.z), 0.05f);
             yield return null;
         }
 
+
+        //mAnim.SetBool("isGrounded", true);
+        penningRoutine = null;
+        yield return null;
+    }
+
+    private IEnumerator UnpenSelf()
+    {
+        if (creaturePen == null)
+            creaturePen = GameScoreManager.Instance.creaturePen;
+
+        creaturePen.SubtractPoints();
+
+        float jumpHeight = transform.position.y + 5;
+
+        mAnim.SetBool("isGrounded", false);
+        mAnim.SetTrigger("Jump");
+
+        RandomizeWanderDirection(Vector3.zero);
+        Vector3 jumpDestination = creaturePen.transform.position + (wanderDirection * 14);
+        transform.LookAt(jumpDestination);
+        while (isPenned)
+        {
+            transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(jumpDestination.x, transform.position.y, jumpDestination.z), 0.05f);
+            if (mAnim.GetBool("isGrounded") == true)
+            {
+                isPenned = false;
+            }
+            yield return null;
+        }
+
+        penningRoutine = null;
+        RandomizeWanderDirection(Vector3.zero);
         yield return null;
     }
 }

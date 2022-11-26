@@ -15,6 +15,7 @@ MonoBehaviour:
   clipsize: 0
   currentAmmo: 0
   shotsPerSecond: 0
-  impatience: 0
+  patience: 15
+  patienceRange: 5
   mAnimController: {fileID: 0}
   critterObj: {fileID: 0}

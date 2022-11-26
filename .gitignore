@@ -7,3 +7,5 @@ obj/Debug
 .vs/
 UserSettings/
 Arcade.sln
+Behaviours.csproj
+Behaviours.Player.csproj

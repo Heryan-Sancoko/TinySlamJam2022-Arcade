@@ -38,4 +38,9 @@ public class GameScoreManager : MonoBehaviour
         pointsScored += additionalPoints;
         pointsText.text = pointsScored.ToString();
     }
+    public void SubtractPoints(int pointsLost)
+    {
+        pointsScored -= pointsLost;
+        pointsText.text = pointsScored.ToString();
+    }
 }

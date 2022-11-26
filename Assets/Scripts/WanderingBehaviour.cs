@@ -42,7 +42,7 @@ public class WanderingBehaviour : EntityBehaviour
             Vector3 newDirection = Vector3.RotateTowards(transform.forward, wanderDirection, (currentMoveSpeed*3)*Time.deltaTime, 0.0f);
             transform.rotation = Quaternion.LookRotation(newDirection);
             //transform.LookAt(transform.position + wanderDirection);
-            rbody.velocity = transform.forward * currentMoveSpeed;
+            rbody.velocity = ChangeVelocityWithGravity(transform.forward * currentMoveSpeed);
 
             if (Physics.Raycast(transform.position+((-transform.forward)*0.5f), transform.forward, out RaycastHit hitinfo, 3, lookForwardMask))
             {
@@ -52,9 +52,16 @@ public class WanderingBehaviour : EntityBehaviour
         else
         {
             isMoving = false;
-            rbody.velocity = Vector3.zero;
+            rbody.velocity = ChangeVelocityWithGravity(Vector3.zero);
         }
 
+    }
+
+    private Vector3 ChangeVelocityWithGravity(Vector3 newVelocity)
+    {
+        float oldY = rbody.velocity.y;
+        newVelocity.y = oldY;
+        return newVelocity;
     }
 
     protected void RandomizeWanderDirection(Vector3 wallNormal)
