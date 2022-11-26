@@ -31,8 +31,13 @@ public class CritterBehaviour : WanderingBehaviour
 
     private Coroutine penningRoutine;
     private bool isAroundPen = false;
+    [SerializeField]
     private float patienceTimer;
     private PenBehaviour creaturePen;
+
+    [SerializeField]
+    private SkinnedMeshRenderer mSkin;
+    public SkinnedMeshRenderer critterSkin => mSkin;
     
 
 
@@ -122,6 +127,7 @@ public class CritterBehaviour : WanderingBehaviour
             {
                 if (penningRoutine == null)
                     penningRoutine = StartCoroutine(UnpenSelf());
+
             }
         }
 
@@ -160,8 +166,9 @@ public class CritterBehaviour : WanderingBehaviour
     {
         if (penningRoutine != null)
         {
-            StopCoroutine(penningRoutine);
-            penningRoutine = null;
+            return;
+            //StopCoroutine(penningRoutine);
+            //penningRoutine = null;
         }
 
 
@@ -212,6 +219,11 @@ public class CritterBehaviour : WanderingBehaviour
         if (collision.gameObject.layer == 3)
         {
             mAnim.SetBool("isGrounded", true);
+            if (isPenned)
+            {
+                penningRoutine = null;
+                mSkin.enabled = false;
+            }
         }
     }
 
@@ -276,6 +288,7 @@ public class CritterBehaviour : WanderingBehaviour
     private IEnumerator GetPenned()
     {
         isPenned = true;
+        gameObject.layer = 14;
         patienceTimer = Random.Range(mCritterObject.patience - mCritterObject.patienceRange, mCritterObject.patience + mCritterObject.patienceRange);
         if (creaturePen==null)
         creaturePen = GameScoreManager.Instance.creaturePen;
@@ -284,20 +297,21 @@ public class CritterBehaviour : WanderingBehaviour
         transform.LookAt(creaturePen.transform.position);
         float jumpHeight = transform.position.y + 5;
         float originalHeight = transform.position.y;
+        mAnim.SetBool("isPenned", true);
         mAnim.SetBool("isGrounded", false);
         mAnim.SetTrigger("Jump");
 
         while (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(creaturePen.transform.position.x, creaturePen.transform.position.z)) > 1f)
         {
             wanderDirection = Vector3.zero;
+            rbody.velocity = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(creaturePen.transform.position.x, transform.position.y, creaturePen.transform.position.z), 0.05f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(creaturePen.transform.position.x, transform.position.y, creaturePen.transform.position.z), 0.1f);
             yield return null;
         }
 
-
+        //penningRoutine = null;
         //mAnim.SetBool("isGrounded", true);
-        penningRoutine = null;
         yield return null;
     }
 
@@ -307,8 +321,8 @@ public class CritterBehaviour : WanderingBehaviour
             creaturePen = GameScoreManager.Instance.creaturePen;
 
         creaturePen.SubtractPoints();
-
-        float jumpHeight = transform.position.y + 5;
+        mSkin.enabled = true;
+        float jumpHeight = transform.position.y + 10;
 
         mAnim.SetBool("isGrounded", false);
         mAnim.SetTrigger("Jump");
@@ -318,8 +332,9 @@ public class CritterBehaviour : WanderingBehaviour
         transform.LookAt(jumpDestination);
         while (isPenned)
         {
+            rbody.velocity = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(jumpDestination.x, transform.position.y, jumpDestination.z), 0.05f);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(jumpDestination.x, transform.position.y, jumpDestination.z), 0.1f);
             if (mAnim.GetBool("isGrounded") == true)
             {
                 isPenned = false;
@@ -327,6 +342,8 @@ public class CritterBehaviour : WanderingBehaviour
             yield return null;
         }
 
+        gameObject.layer = 6;
+        mAnim.SetBool("isPenned", false);
         penningRoutine = null;
         RandomizeWanderDirection(Vector3.zero);
         yield return null;

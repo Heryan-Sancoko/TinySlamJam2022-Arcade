@@ -132,6 +132,9 @@ public class HeroBehaviour : EntityBehaviour
 
     private void PickupCritter(CritterBehaviour newCritter)
     {
+        if (newCritter.isPenned || newCritter.critterSkin.enabled == false)
+            return;
+
         heldCritter = newCritter;
         newCritter.PickupCritter();
     }
