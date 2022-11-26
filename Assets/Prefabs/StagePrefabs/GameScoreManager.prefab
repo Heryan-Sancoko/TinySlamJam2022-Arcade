@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3672300839435496500
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3672300839435496502}
+  - component: {fileID: 3672300839435496501}
+  m_Layer: 0
+  m_Name: GameScoreManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3672300839435496502
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3672300839435496500}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -17.326656, y: -13.849361, z: 11.307724}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3672300839435496501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3672300839435496500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b28fbed70e39214f99ae4d84b7ef0d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heroInstance: {fileID: 0}
+  creaturePen: {fileID: 0}
+  pointsToWin: 5
+  pointsText: {fileID: 0}
+  critterList:
+  - {fileID: 3121951438207847224, guid: 016ba1078aebbea4b9b2cdd84088402e, type: 3}
+  spawnedCritterAmount: 0
+  Hearts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  LoseButton: {fileID: 0}

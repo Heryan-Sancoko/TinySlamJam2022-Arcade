@@ -222,7 +222,7 @@ MonoBehaviour:
   worldMousePos: {x: 0, y: 0, z: 0}
   lookLayer:
     serializedVersion: 2
-    m_Bits: 72
+    m_Bits: 328
 --- !u!54 &4417651211061327203
 Rigidbody:
   m_ObjectHideFlags: 0

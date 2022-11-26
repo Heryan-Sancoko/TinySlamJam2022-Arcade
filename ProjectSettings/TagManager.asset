@@ -20,9 +20,9 @@ TagManager:
   - CreaturePen
   - Hero
   - PennedCritter
-  - 
-  - 
-  - 
+  - GrabbedEnemy
+  - EnemyHands
+  - EnemyAggro
   - 
   - 
   - 

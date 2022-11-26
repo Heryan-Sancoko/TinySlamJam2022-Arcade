@@ -641,6 +641,11 @@ MonoBehaviour:
   SeeTheseLayers:
     serializedVersion: 2
     m_Bits: 0
+  penWalls:
+  - {fileID: 7540061012084035487}
+  - {fileID: 7540061011643104196}
+  - {fileID: 7540061012410574748}
+  - {fileID: 7540061011895799873}
 --- !u!65 &166932470912456039
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -9,6 +9,8 @@ public class PenBehaviour : MonoBehaviour
     public Collider penTrigger;
     public LayerMask SeeTheseLayers;
 
+    public List<Collider> penWalls = new List<Collider>();
+
     private void Start()
     {
         ConfigurePenPos();

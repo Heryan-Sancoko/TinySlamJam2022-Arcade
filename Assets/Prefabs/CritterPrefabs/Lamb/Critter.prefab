@@ -164,6 +164,7 @@ MonoBehaviour:
   shootMaxCooldown: 0.2
   patienceTimer: 0
   mSkin: {fileID: 8376663191792049582}
+  mycollider: {fileID: 3121951438207847225}
 --- !u!54 &3121951438207847227
 Rigidbody:
   m_ObjectHideFlags: 0

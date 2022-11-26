@@ -38,6 +38,10 @@ public class CritterBehaviour : WanderingBehaviour
     [SerializeField]
     private SkinnedMeshRenderer mSkin;
     public SkinnedMeshRenderer critterSkin => mSkin;
+    [SerializeField]
+    private Collider mycollider;
+
+    private bool heldByHero = false;
     
 
 
@@ -56,23 +60,26 @@ public class CritterBehaviour : WanderingBehaviour
         switch (currentState)
         {
             case critterState.held:
-                if (mHero == null)
+                if (heldByHero)
                 {
-                    if (HeroManager.Instance != null)
+                    if (mHero == null)
                     {
-                        if (HeroManager.Instance.heroInstance == null)
+                        if (HeroManager.Instance != null)
                         {
-                            Debug.Log("WHY");
+                            if (HeroManager.Instance.heroInstance == null)
+                            {
+                                Debug.Log("WHY");
+                            }
+                            else
+                                mHero = HeroManager.Instance.heroInstance;
                         }
                         else
-                        mHero = HeroManager.Instance.heroInstance;
+                            return;
                     }
-                    else
-                        return;
-                }
 
-                transform.position = mHero.heldTransform.position;
-                transform.rotation = mHero.heldTransform.rotation;
+                    transform.position = mHero.heldTransform.position;
+                    transform.rotation = mHero.heldTransform.rotation;
+                }
 
                 if (isPenned)
                     currentState = critterState.idle;
@@ -162,7 +169,7 @@ public class CritterBehaviour : WanderingBehaviour
         }
     }
 
-    public void PickupCritter()
+    public void PickupCritter(bool isHeldByHero)
     {
         if (penningRoutine != null)
         {
@@ -171,6 +178,7 @@ public class CritterBehaviour : WanderingBehaviour
             //penningRoutine = null;
         }
 
+        heldByHero = isHeldByHero;
 
         mAnim.SetBool("isMoving", false);
         mAnim.SetBool("isGrounded", true);
@@ -180,6 +188,15 @@ public class CritterBehaviour : WanderingBehaviour
         mAnim.SetBool("isLaunched", false);
         isPenned = false;
 
+    }
+
+    public void DropCritter()
+    {
+        if (GameScoreManager.Instance != null)
+            OnTriggerExit(GameScoreManager.Instance.creaturePen.penTrigger);
+
+        currentState = critterState.idle;
+        mAnim.SetBool("isLaunched", false);
     }
 
     public void LaunchCritter()
@@ -225,6 +242,17 @@ public class CritterBehaviour : WanderingBehaviour
                 mSkin.enabled = false;
             }
         }
+
+        if (collision.gameObject.layer == 16)
+        {
+            if (!isPenned)
+            {
+                if (collision.gameObject.TryGetComponent(out MonsterBehaviour monster))
+                {
+                    monster.CatchTargetedCritter(this);
+                }
+            }
+        }
     }
 
     private void OnCollisionStay(Collision collision)
@@ -255,6 +283,14 @@ public class CritterBehaviour : WanderingBehaviour
             isAroundPen = false;
             isPenned = false;
         }
+
+        if (other.gameObject.layer == 8)
+        {
+            if (other.gameObject.TryGetComponent(out MonsterBehaviour enemy))
+            {
+                enemy.RemoveFromCritterList(this);
+            }
+        }
     }
 
     private void OnTriggerStay(Collider other)
@@ -283,6 +319,15 @@ public class CritterBehaviour : WanderingBehaviour
                     penningRoutine = StartCoroutine(GetPenned());
             }
         }
+
+        if (other.gameObject.layer == 17)
+        {
+            if (other.transform.parent.gameObject.TryGetComponent(out MonsterBehaviour enemy))
+            {
+                enemy.AddToCritterList(this);
+            }
+        }
+
     }
 
     private IEnumerator GetPenned()
@@ -303,6 +348,7 @@ public class CritterBehaviour : WanderingBehaviour
 
         while (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(creaturePen.transform.position.x, creaturePen.transform.position.z)) > 1f)
         {
+            yield return new WaitForEndOfFrame();
             wanderDirection = Vector3.zero;
             rbody.velocity = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
@@ -320,6 +366,11 @@ public class CritterBehaviour : WanderingBehaviour
         if (creaturePen == null)
             creaturePen = GameScoreManager.Instance.creaturePen;
 
+        foreach (Collider wall in creaturePen.penWalls)
+        {
+            Physics.IgnoreCollision(mycollider, wall, true);
+        }
+        gameObject.layer = 14;
         creaturePen.SubtractPoints();
         mSkin.enabled = true;
         float jumpHeight = transform.position.y + 10;
@@ -328,20 +379,23 @@ public class CritterBehaviour : WanderingBehaviour
         mAnim.SetTrigger("Jump");
 
         RandomizeWanderDirection(Vector3.zero);
-        Vector3 jumpDestination = creaturePen.transform.position + (wanderDirection * 14);
+        Vector3 jumpDestination = creaturePen.transform.position + (wanderDirection * 10);
         transform.LookAt(jumpDestination);
-        while (isPenned)
+        while ((Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(jumpDestination.x, jumpDestination.z)) > 0.1f))
         {
+            yield return new WaitForEndOfFrame();
             rbody.velocity = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(jumpDestination.x, transform.position.y, jumpDestination.z), 0.1f);
-            if (mAnim.GetBool("isGrounded") == true)
-            {
-                isPenned = false;
-            }
             yield return null;
         }
 
+        isPenned = false;
+
+        foreach (Collider wall in creaturePen.penWalls)
+        {
+            Physics.IgnoreCollision(mycollider, wall, false);
+        }
         gameObject.layer = 6;
         mAnim.SetBool("isPenned", false);
         penningRoutine = null;

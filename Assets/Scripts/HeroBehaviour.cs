@@ -36,9 +36,12 @@ public class HeroBehaviour : EntityBehaviour
 
     //-------------------for critters
     public Transform heldTransform;
+    [SerializeField]
     private CritterBehaviour heldCritter;
+    public MonsterBehaviour heldMonster;
     [SerializeField]
     private float pickupRange;
+    private bool successfulClickThisFrame = false;
 
 
     //--------------------for mousePos
@@ -84,6 +87,10 @@ public class HeroBehaviour : EntityBehaviour
         Look();
         Shoot();
     }
+    private void LateUpdate()
+    {
+        successfulClickThisFrame = false;
+    }
 
     private void Shoot()
     {
@@ -95,35 +102,75 @@ public class HeroBehaviour : EntityBehaviour
 
     private void ThrowHeld()
     {
-        if (heldCritter != null && pickUpThrow.WasReleasedThisFrame())
+        if (pickUpThrow.WasReleasedThisFrame() && !successfulClickThisFrame)
         {
-            heldCritter.LaunchCritter();
-            heldCritter = null;
+            if (heldCritter != null)
+            {
+                heldCritter.LaunchCritter();
+                heldCritter = null;
+                successfulClickThisFrame = true;
+            }
+
+            if (heldMonster != null)
+            {
+                heldMonster.LaunchEnemy();
+                heldMonster = null;
+                successfulClickThisFrame = true;
+            }
         }
     }
 
     private void Look()
     {
         ThrowHeld();
-        heldTransform.gameObject.SetActive(heldCritter != null);
+
+        heldTransform.gameObject.SetActive(heldCritter != null && heldMonster != null);
 
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;
-        if (Physics.Raycast(ray, out hitData, 999999,lookLayer))
+        if (Physics.Raycast(ray, out hitData, 999999, lookLayer))
         {
             worldMousePos = hitData.point;
             worldMousePos.y = transform.position.y;
-            if (hitData.collider.gameObject.layer == 6)
+
+            if (pickUpThrow.WasReleasedThisFrame() && heldCritter == null && heldMonster == null)
             {
-                if (hitData.collider.gameObject.TryGetComponent(out CritterBehaviour newCritter))
+                switch (hitData.collider.gameObject.layer)
                 {
-                    //looking at a critter
-                    if (Vector3.Distance(transform.position, newCritter.transform.position) < pickupRange &&
-                        pickUpThrow.WasReleasedThisFrame())
-                    {
-                        PickupCritter(newCritter);
-                    }
+                    case 6:
+                        if (hitData.collider.gameObject.TryGetComponent(out CritterBehaviour newCritter))
+                        {
+                            Debug.LogError("CRITTER!");
+                            //looking at a critter
+                            if (Vector3.Distance(transform.position, newCritter.transform.position) < pickupRange)
+                            {
+
+                                if (!successfulClickThisFrame)
+                                {
+                                    PickupCritter(newCritter);
+                                    successfulClickThisFrame = true;
+                                }
+                            }
+                        }
+                        break;
+                    case 8:
+                        if (hitData.collider.gameObject.TryGetComponent(out MonsterBehaviour newMonster))
+                        {
+                            Debug.LogError("MONSTER!");
+                            //looking at a monster
+                            if (Vector3.Distance(transform.position, newMonster.transform.position) < pickupRange)
+                            {
+                                if (!successfulClickThisFrame)
+                                {
+                                    PickupMonster(newMonster);
+                                    successfulClickThisFrame = true;
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
             RotateToMousePosition();
@@ -132,11 +179,20 @@ public class HeroBehaviour : EntityBehaviour
 
     private void PickupCritter(CritterBehaviour newCritter)
     {
-        if (newCritter.isPenned || newCritter.critterSkin.enabled == false)
+        if (newCritter.isPenned || newCritter.critterSkin.enabled == false || heldMonster!=null)
             return;
 
         heldCritter = newCritter;
-        newCritter.PickupCritter();
+        newCritter.PickupCritter(true);
+    }
+
+    private void PickupMonster(MonsterBehaviour newMonster)
+    {
+        if (heldCritter != null)
+            return;
+
+        heldMonster = newMonster;
+        newMonster.GrabMonster();
     }
 
     private void Move()

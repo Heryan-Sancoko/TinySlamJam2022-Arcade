@@ -22,7 +22,15 @@ public class GameScoreManager : MonoBehaviour
 
     [SerializeField]
     private List<CritterBehaviour> critterList = new List<CritterBehaviour>();
-    private int spawnedCritterAmount = 0;
+    public int spawnedCritterAmount = 0;
+
+    [SerializeField]
+    private List<Image> Hearts = new List<Image>();
+
+    [SerializeField]
+    private Button LoseButton;
+    [SerializeField]
+    private Button winButton;
 
     public static GameScoreManager Instance
     {
@@ -49,11 +57,9 @@ public class GameScoreManager : MonoBehaviour
         SpawnCritter();
         if (pointsToWin <= pointsScored)
         {
-            if (SceneManager.sceneCount != SceneManager.GetActiveScene().buildIndex)
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-            else
-                SceneManager.LoadScene(0);
             //you win!
+            winButton.gameObject.SetActive(true);
+            Time.timeScale = 0;
         }
     }
     public void SubtractPoints(int pointsLost)
@@ -78,5 +84,38 @@ public class GameScoreManager : MonoBehaviour
         newCritter.transform.position = spawnPosition;
         spawnedCritterAmount++;
 
+    }
+
+    public void LoseHeart()
+    {
+        Image redHeart = Hearts.Find(x => x.color != Color.black);
+
+        if (redHeart != null)
+        {
+            redHeart.color = Color.black;
+        }
+        else
+        {
+            //YOU LOSE
+            LoseButton.gameObject.SetActive(true);
+            Time.timeScale = 0;
+        }
+        SpawnCritter();
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene(0);
+    }
+
+    public void GoNextScene()
+    {
+        Time.timeScale = 1;
+
+        if (SceneManager.sceneCount != SceneManager.GetActiveScene().buildIndex)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        else
+            SceneManager.LoadScene(0);
     }
 }
