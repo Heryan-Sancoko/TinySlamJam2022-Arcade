@@ -70,13 +70,13 @@ public class CritterBehaviour : WanderingBehaviour
 
             case critterState.wander:
                 WanderRandomly();
-                if (rbody.velocity.magnitude == 0)
+                if (wanderDirection == Vector3.zero)
                     currentState = critterState.idle;
                 break;
 
             case critterState.idle:
                 WanderRandomly();
-                if (rbody.velocity.magnitude > 0)
+                if (wanderDirection != Vector3.zero)
                     currentState = critterState.wander;
                 break;
 
@@ -141,6 +141,33 @@ public class CritterBehaviour : WanderingBehaviour
             }
         }
 
-        //if (collision.gameObject.layer == )
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.layer == 12)
+        {
+            if (currentState == critterState.launched)
+            {
+                isPenned = true;
+                StartCoroutine(GetPenned());
+            }
+        }
+    }
+
+    private IEnumerator GetPenned()
+    {
+        PenBehaviour creaturePen = GameScoreManager.Instance.creaturePen;
+        float jumpHeight = transform.position.y + 5;
+        float originalHeight = transform.position.y;
+
+        while (Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(creaturePen.transform.position.x, creaturePen.transform.position.z)) > 0.1f)
+        {
+            transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
+            transform.position = Vector3.Lerp(transform.position, new Vector3(creaturePen.transform.position.x, transform.position.y, creaturePen.transform.position.z), 0.1f);
+            yield return null;
+        }
+
+        yield return null;
     }
 }

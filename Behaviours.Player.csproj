@@ -65,7 +65,7 @@
     <Compile Include="Assets\Scripts\PlayerControls.cs" />
     <Compile Include="Assets\Scripts\EntityBehaviour.cs" />
     <Compile Include="Assets\Scripts\GameScoreManager.cs" />
-    <Compile Include="Assets\Scripts\PenBehaviour.cs" />
+    <Compile Include="Assets\Scripts\Pen\PenBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scripts\Behaviours.asmdef" />
