@@ -25,7 +25,7 @@ public class CritterBehaviour : EntityBehaviour
     private Vector3 wanderDestination;
     private List<ProjectileBehaviour> listOfBullets = new List<ProjectileBehaviour>();
     [SerializeField]
-    private GameObject bulletPrefab;
+    private ProjectileBehaviour bulletPrefab;
 
     // Start is called before the first frame update
     void Start()
@@ -72,8 +72,18 @@ public class CritterBehaviour : EntityBehaviour
 
         if (newBullet == null)
         {
-            //newBullet = Instantiate(bulletPrefab,transform.position+transform.forward,transform.rotation);
+            newBullet = Instantiate(bulletPrefab, transform.position + transform.forward, transform.rotation);
+            listOfBullets.Add(newBullet);
         }
+        else
+        {
+            newBullet.transform.position = transform.position + transform.forward;
+            newBullet.transform.rotation = transform.rotation;
+            newBullet.gameObject.SetActive(true);
+        }
+
+
+
     }
 
 

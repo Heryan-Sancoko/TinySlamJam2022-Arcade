@@ -5,12 +5,16 @@ using UnityEngine;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
-    [SerializeField]
     private Rigidbody rbody;
     public float moveSpeed;
     [SerializeField]
     private float bulletLifetime;
     private float currentLifetime;
+
+    private void Awake()
+    {
+        rbody = GetComponent<Rigidbody>();
+    }
 
     // Start is called before the first frame update
     private void OnEnable()
