@@ -82,6 +82,15 @@ public class HeroBehaviour : EntityBehaviour
     {
         Move();
         Look();
+        Shoot();
+    }
+
+    private void Shoot()
+    {
+        if (fire.WasReleasedThisFrame() && heldCritter != null)
+        {
+            heldCritter.Shoot();
+        }
     }
 
     private void ThrowHeld()

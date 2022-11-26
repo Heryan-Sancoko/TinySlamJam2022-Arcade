@@ -25,7 +25,11 @@ public class CritterBehaviour : EntityBehaviour
     private Vector3 wanderDestination;
     private List<ProjectileBehaviour> listOfBullets = new List<ProjectileBehaviour>();
     [SerializeField]
-    private GameObject bulletPrefab;
+    private ProjectileBehaviour bulletPrefab;
+    [SerializeField]
+    private float shootMaxCooldown = 0.2f;
+    private float shootCurCooldown = 0;
+
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +41,8 @@ public class CritterBehaviour : EntityBehaviour
     // Update is called once per frame
     void Update()
     {
+        shootCurCooldown -= Time.deltaTime;
+
         switch (currentState)
         {
             case critterState.held:
@@ -63,16 +69,27 @@ public class CritterBehaviour : EntityBehaviour
 
     public void Shoot()
     {
-        if (listOfBullets == null)
+        if (shootCurCooldown <= 0)
         {
-            listOfBullets = new List<ProjectileBehaviour>();
-        }
+            if (listOfBullets == null)
+            {
+                listOfBullets = new List<ProjectileBehaviour>();
+            }
 
-        ProjectileBehaviour newBullet = listOfBullets.Find(x => x.gameObject.activeSelf == false);
+            ProjectileBehaviour newBullet = listOfBullets.Find(x => x.gameObject.activeSelf == false);
 
-        if (newBullet == null)
-        {
-            //newBullet = Instantiate(bulletPrefab,transform.position+transform.forward,transform.rotation);
+            if (newBullet == null)
+            {
+                newBullet = Instantiate(bulletPrefab, transform.position + transform.forward, transform.rotation);
+                listOfBullets.Add(newBullet);
+            }
+            else
+            {
+                newBullet.transform.position = transform.position + transform.forward;
+                newBullet.transform.rotation = transform.rotation;
+                newBullet.gameObject.SetActive(true);
+            }
+            shootCurCooldown = shootMaxCooldown;
         }
     }
 

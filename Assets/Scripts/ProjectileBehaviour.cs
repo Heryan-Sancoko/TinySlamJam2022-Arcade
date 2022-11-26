@@ -5,12 +5,18 @@ using UnityEngine;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
-    [SerializeField]
     private Rigidbody rbody;
     public float moveSpeed;
     [SerializeField]
     private float bulletLifetime;
     private float currentLifetime;
+    [SerializeField]
+    private float velocityDecay;
+
+    private void Awake()
+    {
+        rbody = GetComponent<Rigidbody>();
+    }
 
     // Start is called before the first frame update
     private void OnEnable()
@@ -30,5 +36,12 @@ public class ProjectileBehaviour : MonoBehaviour
         currentLifetime -= Time.deltaTime;
         if (currentLifetime <= 0)
             gameObject.SetActive(false);
+
+        float speedDecay = 1 - velocityDecay;
+
+        if (speedDecay <= 0)
+            speedDecay = 0;
+
+        rbody.velocity = rbody.velocity * (1 - velocityDecay);
     }
 }
