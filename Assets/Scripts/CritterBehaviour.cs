@@ -7,7 +7,6 @@ public enum critterState
     held,
     idle,
     wander,
-    roosting,
     launched
 }
 
@@ -17,6 +16,7 @@ public class CritterBehaviour : WanderingBehaviour
     public CritterObject mCritterObject;
     public Animator mAnim;
     public critterState currentState;
+    public bool isPenned = false;
     public float launchVelocity = 20;
     [SerializeField]
     private float launchMaxDuration = 0.5f;
@@ -28,6 +28,8 @@ public class CritterBehaviour : WanderingBehaviour
     [SerializeField]
     private float shootMaxCooldown = 0.2f;
     private float shootCurCooldown = 0;
+    
+    
 
 
     // Start is called before the first frame update
@@ -47,30 +49,42 @@ public class CritterBehaviour : WanderingBehaviour
             case critterState.held:
                 transform.position = mHero.heldTransform.position;
                 transform.rotation = mHero.heldTransform.rotation;
+
+                if (isPenned)
+                    currentState = critterState.idle;
                 break;
+
             case critterState.launched:
                 launchCurDuration -= Time.deltaTime;
-                if (launchCurDuration<=0)
+                if (launchCurDuration <= 0 || isPenned)
                 {
                     launchCurDuration = 0;
                     rbody.velocity = Vector3.zero;
                     currentState = critterState.idle;
                     mAnim.SetBool("isLaunched", false);
+
+                    if (isPenned)
+                        currentState = critterState.idle;
                 }
                 break;
+
             case critterState.wander:
                 WanderRandomly();
                 if (rbody.velocity.magnitude == 0)
                     currentState = critterState.idle;
                 break;
+
             case critterState.idle:
                 WanderRandomly();
                 if (rbody.velocity.magnitude > 0)
                     currentState = critterState.wander;
                 break;
+
             default:
                 break;
         }
+
+        mAnim.SetBool("isMoving", (rbody.velocity.magnitude > 0 && currentState!= critterState.held));
 
     }
 
