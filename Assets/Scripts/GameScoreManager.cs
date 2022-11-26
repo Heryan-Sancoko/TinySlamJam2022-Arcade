@@ -8,7 +8,7 @@ public class GameScoreManager : MonoBehaviour
 
     private static GameScoreManager _instance;
 
-    public GameScoreManager heroInstance;
+    public HeroBehaviour heroInstance;
     public PenBehaviour creaturePen;
     private int pointsScored = 0;
 

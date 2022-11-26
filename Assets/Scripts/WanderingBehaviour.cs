@@ -6,7 +6,10 @@ public class WanderingBehaviour : EntityBehaviour
 {
     [SerializeField]
     protected bool dontIdleWhileWandering = false;
+    [SerializeField]
     protected Vector3 wanderDirection;
+    [SerializeField]
+    protected Vector3 mySpeed;
     [SerializeField]
     protected float maxWanderTime;
     [SerializeField]
@@ -39,21 +42,23 @@ public class WanderingBehaviour : EntityBehaviour
         if (wanderIntent == 1 || dontIdleWhileWandering)
         {
             isMoving = true;
-            Vector3 newDirection = Vector3.RotateTowards(transform.forward, wanderDirection, (currentMoveSpeed*3)*Time.deltaTime, 0.0f);
-            transform.rotation = Quaternion.LookRotation(newDirection);
-            //transform.LookAt(transform.position + wanderDirection);
-            rbody.velocity = ChangeVelocityWithGravity(transform.forward * currentMoveSpeed);
-
-            if (Physics.Raycast(transform.position+((-transform.forward)*0.5f), transform.forward, out RaycastHit hitinfo, 3, lookForwardMask))
+            if (Physics.Raycast(transform.position + ((-transform.forward) * 0.5f), transform.forward, out RaycastHit hitinfo, 3, lookForwardMask))
             {
                 RandomizeWanderDirection(hitinfo.normal);
             }
+            Vector3 newDirection = Vector3.RotateTowards(transform.forward, wanderDirection, (currentMoveSpeed*3)*Time.deltaTime, 0.0f);
+            transform.rotation = Quaternion.LookRotation(newDirection);
+            Vector3 newSpeed = mySpeed = transform.forward * currentMoveSpeed;
+            rbody.velocity = mySpeed = ChangeVelocityWithGravity(transform.forward * currentMoveSpeed);
+
         }
         else
         {
             isMoving = false;
             rbody.velocity = ChangeVelocityWithGravity(Vector3.zero);
         }
+
+        //mySpeed = rbody.velocity;
 
     }
 

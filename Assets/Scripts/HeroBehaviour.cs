@@ -105,6 +105,8 @@ public class HeroBehaviour : EntityBehaviour
     private void Look()
     {
         ThrowHeld();
+        heldTransform.gameObject.SetActive(heldCritter != null);
+
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hitData;

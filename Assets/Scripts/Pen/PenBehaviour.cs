@@ -9,6 +9,17 @@ public class PenBehaviour : MonoBehaviour
 
     private void Start()
     {
+        for (int i = 0; i < 10; i++)
+        {
+            float spawnZ = Random.Range
+                (-20, 20);
+            float spawnX = Random.Range
+                (-17, 17);
+
+            Vector3 spawnPosition = new Vector3(spawnX, transform.position.y, spawnZ);
+            transform.position = spawnPosition;
+        }
+
         penTrigger = GetComponent<BoxCollider>();
         if (GameScoreManager.Instance !=null)
         gsm = GameScoreManager.Instance;

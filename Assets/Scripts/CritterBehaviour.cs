@@ -51,6 +51,21 @@ public class CritterBehaviour : WanderingBehaviour
         switch (currentState)
         {
             case critterState.held:
+                if (mHero == null)
+                {
+                    if (HeroManager.Instance != null)
+                    {
+                        if (HeroManager.Instance.heroInstance == null)
+                        {
+                            Debug.Log("WHY");
+                        }
+                        else
+                        mHero = HeroManager.Instance.heroInstance;
+                    }
+                    else
+                        return;
+                }
+
                 transform.position = mHero.heldTransform.position;
                 transform.rotation = mHero.heldTransform.rotation;
 
@@ -76,8 +91,11 @@ public class CritterBehaviour : WanderingBehaviour
                 if (penningRoutine == null)
                 {
                     WanderRandomly();
-                    if (wanderDirection == Vector3.zero)
-                        currentState = critterState.idle;
+                    if (wanderIntent !=1)
+                    {
+                        mAnim.SetBool("isMoving", false);
+                           currentState = critterState.idle;
+                    }
                 }
                 break;
 
@@ -85,8 +103,11 @@ public class CritterBehaviour : WanderingBehaviour
                 if (penningRoutine == null)
                 {
                     WanderRandomly();
-                    if (wanderDirection != Vector3.zero)
+                    if (wanderIntent == 1)
+                    {
+                        mAnim.SetBool("isMoving", true);
                         currentState = critterState.wander;
+                    }
                 }
                 break;
 
@@ -104,7 +125,7 @@ public class CritterBehaviour : WanderingBehaviour
             }
         }
 
-            mAnim.SetBool("isMoving", (rbody.velocity.magnitude > 0 && currentState!= critterState.held));
+            //mAnim.SetBool("isMoving", (wanderDirection!=Vector3.zero && currentState!= critterState.held));
 
 
     }
@@ -143,6 +164,8 @@ public class CritterBehaviour : WanderingBehaviour
             penningRoutine = null;
         }
 
+
+        mAnim.SetBool("isMoving", false);
         mAnim.SetBool("isGrounded", true);
 
         currentState = critterState.held;
@@ -154,7 +177,9 @@ public class CritterBehaviour : WanderingBehaviour
 
     public void LaunchCritter()
     {
-        OnTriggerExit(GameScoreManager.Instance.creaturePen.penTrigger);
+        if (GameScoreManager.Instance != null)
+            OnTriggerExit(GameScoreManager.Instance.creaturePen.penTrigger);
+
         currentState = critterState.launched;
         launchCurDuration = launchMaxDuration;
         rbody.velocity = transform.forward * launchVelocity;
@@ -213,8 +238,11 @@ public class CritterBehaviour : WanderingBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        isAroundPen = false;
-        isPenned = false;
+        if (other.gameObject.layer == 12)
+        {
+            isAroundPen = false;
+            isPenned = false;
+        }
     }
 
     private void OnTriggerStay(Collider other)
