@@ -646,6 +646,10 @@
       <Project>{1808EA0E-9849-6586-4301-CE27395BD919}</Project>
       <Name>Unity.TextMeshPro.Player</Name>
     </ProjectReference>
+    <ProjectReference Include="Behaviours.Player.csproj">
+      <Project>{AEC52352-34DC-0338-7D4E-2E295D85C3AF}</Project>
+      <Name>Behaviours.Player</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.Flow.Player.csproj">
       <Project>{2310D8DC-5EC9-0A71-11B7-C7B7DE317D64}</Project>
       <Name>Unity.VisualScripting.Flow.Player</Name>
@@ -677,10 +681,6 @@
     <ProjectReference Include="Unity.VisualScripting.State.Player.csproj">
       <Project>{FA91B8D5-C2E6-65FD-DEFA-19373DBB059B}</Project>
       <Name>Unity.VisualScripting.State.Player</Name>
-    </ProjectReference>
-    <ProjectReference Include="Behaviours.Player.csproj">
-      <Project>{AEC52352-34DC-0338-7D4E-2E295D85C3AF}</Project>
-      <Name>Behaviours.Player</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

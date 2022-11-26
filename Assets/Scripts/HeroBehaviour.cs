@@ -15,6 +15,7 @@ public class HeroBehaviour : EntityBehaviour
     private InputAction dash;
     private InputAction pickUpThrow;
 
+    //--------------------for movement
     [SerializeField]
     private float maxMoveSpeed;
     [SerializeField]
@@ -33,6 +34,18 @@ public class HeroBehaviour : EntityBehaviour
 
     private bool isDashing = false;
 
+    //-------------------for critters
+    public Transform heldTransform;
+    private CritterBehaviour heldCritter;
+    [SerializeField]
+    private float pickupRange;
+
+
+    //--------------------for mousePos
+    public Vector3 worldMousePos;
+    public LayerMask lookLayer;
+
+
     private void Awake()
     {
         mInput = new PlayerControls();
@@ -45,7 +58,9 @@ public class HeroBehaviour : EntityBehaviour
         fire = mInput.Player.Fire;
         fire.Enable();
         dash = mInput.Player.Dash;
-        dash.Enable();        
+        dash.Enable();
+        pickUpThrow = mInput.Player.PickupAndThrow;
+        pickUpThrow.Enable();
     }
 
     private void OnDisable()
@@ -53,6 +68,7 @@ public class HeroBehaviour : EntityBehaviour
         move.Disable();
         fire.Disable();
         dash.Disable();
+        pickUpThrow.Disable();
     }
 
     // Start is called before the first frame update
@@ -65,11 +81,46 @@ public class HeroBehaviour : EntityBehaviour
     void Update()
     {
         Move();
-
-
+        Look();
     }
 
-    public void Move()
+    private void ThrowHeld()
+    {
+        if (heldCritter != null && pickUpThrow.WasReleasedThisFrame())
+        {
+            heldCritter.LaunchCritter();
+            heldCritter = null;
+        }
+    }
+
+    private void Look()
+    {
+        ThrowHeld();
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hitData;
+        if (Physics.Raycast(ray, out hitData, 999999,lookLayer))
+        {
+            worldMousePos = hitData.point;
+            worldMousePos.y = transform.position.y;
+            if (hitData.collider.gameObject.layer == 6)
+            {
+                if (hitData.collider.gameObject.TryGetComponent(out CritterBehaviour newCritter))
+                {
+                    //looking at a critter
+                    if (Vector3.Distance(transform.position, newCritter.transform.position) < pickupRange &&
+                        pickUpThrow.WasReleasedThisFrame())
+                    {
+                        heldCritter = newCritter;
+                        newCritter.currentState = critterState.held;
+                    }
+                }
+            }
+            RotateToMousePosition();
+        }
+    }
+
+    private void Move()
     {
         if (!isDashing)
         {
@@ -120,9 +171,22 @@ public class HeroBehaviour : EntityBehaviour
             Dash();
         }
 
+        //RotateToMoveDir();
     }
 
-    public void Dash()
+    private void RotateToMoveDir()
+    {
+        if (rbody.velocity.magnitude!=0)
+        transform.LookAt(transform.position + ((rbody.velocity).normalized*10));
+
+    }
+
+    private void RotateToMousePosition()
+    {
+        transform.LookAt(worldMousePos);
+    }
+
+    private void Dash()
     {
         if (dashTimerCurCooldown > 0)
             return;

@@ -40,6 +40,15 @@
                     "processors": "",
                     "interactions": "Press(behavior=2)",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "PickupAndThrow",
+                    "type": "Button",
+                    "id": "f03a89d9-7a8f-4523-9a47-3bd323a24731",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=2)",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -277,7 +286,7 @@
                 {
                     "name": "",
                     "id": "85e5a4a0-73d4-435f-bed1-00765bd2774b",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Mouse>/middleButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -293,6 +302,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a893a3f4-acd9-4dca-8ad9-67409a7c7702",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PickupAndThrow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a88fa51d-159f-4a2a-8b95-3e93f28d786a",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PickupAndThrow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

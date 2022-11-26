@@ -732,6 +732,10 @@
       <Project>{1F7C31E5-1FC6-F4F9-F200-FEFFFACEFACE}</Project>
       <Name>Unity.VisualScripting.State.Editor</Name>
     </ProjectReference>
+    <ProjectReference Include="Behaviours.csproj">
+      <Project>{317F8A53-D8D0-2149-8958-529398960BC3}</Project>
+      <Name>Behaviours</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.VisualScripting.SettingsProvider.Editor.csproj">
       <Project>{8BB52AB3-B3BA-6D0A-ACE4-5486B143C41D}</Project>
       <Name>Unity.VisualScripting.SettingsProvider.Editor</Name>
@@ -799,10 +803,6 @@
     <ProjectReference Include="Unity.VisualScripting.State.csproj">
       <Project>{64D5D665-3375-FEA0-C5F5-3BED8AC17DFB}</Project>
       <Name>Unity.VisualScripting.State</Name>
-    </ProjectReference>
-    <ProjectReference Include="Behaviours.csproj">
-      <Project>{317F8A53-D8D0-2149-8958-529398960BC3}</Project>
-      <Name>Behaviours</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
