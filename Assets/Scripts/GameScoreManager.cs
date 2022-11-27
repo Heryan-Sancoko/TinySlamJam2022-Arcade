@@ -32,6 +32,9 @@ public class GameScoreManager : MonoBehaviour
     [SerializeField]
     private Button winButton;
 
+    public int fadeIn;
+    public int fadeOut;
+
     public static GameScoreManager Instance
     {
         get
@@ -47,6 +50,11 @@ public class GameScoreManager : MonoBehaviour
     private void Awake()
     {
         _instance = this;
+    }
+
+    private void Start()
+    {
+        MusicManager.Instance.FadeInFadeOutMusic(fadeIn, fadeOut);
     }
 
 

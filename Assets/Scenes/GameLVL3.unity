@@ -12687,6 +12687,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1303198643324342481, guid: 2114e59b0a3be9d4880ed0685ced9004, type: 3}
+      propertyPath: fadeIn
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1303198643324342481, guid: 2114e59b0a3be9d4880ed0685ced9004, type: 3}
+      propertyPath: fadeOut
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3867720197461868209, guid: 2114e59b0a3be9d4880ed0685ced9004, type: 3}
       propertyPath: m_Name
       value: StagePrefab02
