@@ -113,7 +113,7 @@ public class GameScoreManager : MonoBehaviour
     {
         Time.timeScale = 1;
 
-        if (SceneManager.sceneCount != SceneManager.GetActiveScene().buildIndex)
+        if (SceneManager.sceneCountInBuildSettings > (SceneManager.GetActiveScene().buildIndex + 1))
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         else
             SceneManager.LoadScene(0);
