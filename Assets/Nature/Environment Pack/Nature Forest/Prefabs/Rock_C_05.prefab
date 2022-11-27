@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4134885822267604}
   - component: {fileID: 33400795023961144}
   - component: {fileID: 23039062222640496}
-  - component: {fileID: 7100967177862726298}
+  - component: {fileID: 3602201340671660374}
   m_Layer: 7
   m_Name: Rock_C_05_LOD0
   m_TagString: Untagged
@@ -84,8 +84,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7100967177862726298
-BoxCollider:
+--- !u!135 &3602201340671660374
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -95,8 +95,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.05264786, y: 0.05608574, z: 0.02784802}
-  m_Center: {x: 0.0021528034, y: 0.0034369065, z: 0.012788993}
+  m_Radius: 0.02804287
+  m_Center: {x: 0.0021528034, y: 0.0034368916, z: 0.012788997}
 --- !u!1 &1407970302558450
 GameObject:
   m_ObjectHideFlags: 0

@@ -93,7 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4244532390818180}
   - component: {fileID: 205938450569084516}
-  - component: {fileID: 1185766865840479528}
+  - component: {fileID: 5425801399249980724}
   m_Layer: 0
   m_Name: DeadTrunk_A_01
   m_TagString: Untagged
@@ -151,8 +151,8 @@ LODGroup:
     renderers:
     - renderer: {fileID: 23626850972185474}
   m_Enabled: 1
---- !u!65 &1185766865840479528
-BoxCollider:
+--- !u!136 &5425801399249980724
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -161,8 +161,9 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2, y: 20, z: 2}
+  m_Radius: 0.5
+  m_Height: 28.71
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1677429209029360
 GameObject:

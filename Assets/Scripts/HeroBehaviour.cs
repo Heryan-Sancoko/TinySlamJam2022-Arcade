@@ -36,12 +36,12 @@ public class HeroBehaviour : EntityBehaviour
 
     //-------------------for critters
     public Transform heldTransform;
-    [SerializeField]
-    private CritterBehaviour heldCritter;
+    public CritterBehaviour heldCritter;
     public MonsterBehaviour heldMonster;
     [SerializeField]
     private float pickupRange;
     private bool successfulClickThisFrame = false;
+    private float actionCooldown = 0.2f;
 
 
     //--------------------for mousePos
@@ -83,6 +83,8 @@ public class HeroBehaviour : EntityBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (actionCooldown > 0)
+            actionCooldown -= Time.deltaTime;
         Move();
         Look();
         Shoot();
@@ -94,35 +96,35 @@ public class HeroBehaviour : EntityBehaviour
 
     private void Shoot()
     {
-        if (fire.WasReleasedThisFrame() && heldCritter != null)
-        {
-            heldCritter.Shoot();
-        }
+        ThrowHeld();
+        //if (fire.WasReleasedThisFrame() && heldCritter != null)
+        //{
+        //    heldCritter.Shoot();
+        //}
     }
 
     private void ThrowHeld()
     {
-        if (pickUpThrow.WasReleasedThisFrame() && !successfulClickThisFrame)
+        if (pickUpThrow.WasReleasedThisFrame() && actionCooldown <= 0 && !successfulClickThisFrame)
         {
             if (heldCritter != null)
             {
                 heldCritter.LaunchCritter();
-                heldCritter = null;
                 successfulClickThisFrame = true;
+                actionCooldown = 0.2f;
             }
 
             if (heldMonster != null)
             {
                 heldMonster.LaunchEnemy();
-                heldMonster = null;
                 successfulClickThisFrame = true;
+                actionCooldown = 0.2f;
             }
         }
     }
 
     private void Look()
     {
-        ThrowHeld();
 
         heldTransform.gameObject.SetActive(heldCritter != null && heldMonster != null);
 
@@ -134,7 +136,7 @@ public class HeroBehaviour : EntityBehaviour
             worldMousePos = hitData.point;
             worldMousePos.y = transform.position.y;
 
-            if (pickUpThrow.WasReleasedThisFrame() && heldCritter == null && heldMonster == null)
+            if (pickUpThrow.WasReleasedThisFrame() && actionCooldown <=0 && !successfulClickThisFrame && heldCritter == null && heldMonster == null)
             {
                 switch (hitData.collider.gameObject.layer)
                 {
@@ -172,26 +174,36 @@ public class HeroBehaviour : EntityBehaviour
                     default:
                         break;
                 }
+
+                actionCooldown = 0.2f;
             }
             RotateToMousePosition();
+
         }
+
+
     }
 
     private void PickupCritter(CritterBehaviour newCritter)
     {
-        if (newCritter.isPenned || newCritter.critterSkin.enabled == false || heldMonster!=null)
+        if (newCritter.isPenned || newCritter.critterSkin.enabled == false)
             return;
 
-        heldCritter = newCritter;
-        newCritter.PickupCritter(true);
+        if (newCritter.heldByMonster != null)
+        {
+            newCritter.heldByMonster.DropHeldCritter();
+        }
+
+        newCritter.PickupCritter(null);
+    }
+
+    public void DropCritter()
+    {
+        heldCritter = null;
     }
 
     private void PickupMonster(MonsterBehaviour newMonster)
     {
-        if (heldCritter != null)
-            return;
-
-        heldMonster = newMonster;
         newMonster.GrabMonster();
     }
 

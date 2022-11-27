@@ -22,8 +22,6 @@ public class PenBehaviour : MonoBehaviour
 
     private void ConfigurePenPos()
     {
-        for (int i = 0; i < 10; i++)
-        {
             float spawnZ = Random.Range
                 (-20, 20);
             float spawnX = Random.Range
@@ -31,7 +29,6 @@ public class PenBehaviour : MonoBehaviour
 
             Vector3 spawnPosition = new Vector3(spawnX, transform.position.y, spawnZ);
             transform.position = spawnPosition;
-        }
 
         RaycastHit[] inMyZone = Physics.BoxCastAll(transform.position + (Vector3.up * 2), penTrigger.bounds.extents * 0.6f, Vector3.down, transform.rotation, 999, SeeTheseLayers);
 

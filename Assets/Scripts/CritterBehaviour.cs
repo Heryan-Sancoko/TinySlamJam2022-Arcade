@@ -41,7 +41,9 @@ public class CritterBehaviour : WanderingBehaviour
     [SerializeField]
     private Collider mycollider;
 
-    private bool heldByHero = false;
+    public MonsterBehaviour heldByMonster;
+
+    public float immuneToGrabsTimer;
     
 
 
@@ -56,11 +58,15 @@ public class CritterBehaviour : WanderingBehaviour
     void Update()
     {
         shootCurCooldown -= Time.deltaTime;
+        if (immuneToGrabsTimer > 0)
+            immuneToGrabsTimer -= Time.deltaTime;
 
         switch (currentState)
         {
             case critterState.held:
-                if (heldByHero)
+                Debug.LogError("is held monster null? " + (heldByMonster == null));
+
+                if (heldByMonster == null)
                 {
                     if (mHero == null)
                     {
@@ -77,8 +83,8 @@ public class CritterBehaviour : WanderingBehaviour
                             return;
                     }
 
-                    transform.position = mHero.heldTransform.position;
-                    transform.rotation = mHero.heldTransform.rotation;
+                        transform.position = mHero.heldTransform.position;
+                        transform.rotation = mHero.heldTransform.rotation;
                 }
 
                 if (isPenned)
@@ -169,7 +175,7 @@ public class CritterBehaviour : WanderingBehaviour
         }
     }
 
-    public void PickupCritter(bool isHeldByHero)
+    public void PickupCritter(MonsterBehaviour heldMonster = null)
     {
         if (penningRoutine != null)
         {
@@ -178,7 +184,17 @@ public class CritterBehaviour : WanderingBehaviour
             //penningRoutine = null;
         }
 
-        heldByHero = isHeldByHero;
+        heldByMonster = heldMonster;
+
+        if (heldMonster == null)
+        {
+            if (mHero.heldMonster != null || mHero.heldCritter != null)
+                return;
+
+            mHero.heldCritter = this;
+
+            immuneToGrabsTimer = 0.5f;
+        }
 
         mAnim.SetBool("isMoving", false);
         mAnim.SetBool("isGrounded", true);
@@ -195,6 +211,7 @@ public class CritterBehaviour : WanderingBehaviour
         if (GameScoreManager.Instance != null)
             OnTriggerExit(GameScoreManager.Instance.creaturePen.penTrigger);
 
+        heldByMonster = null;
         currentState = critterState.idle;
         mAnim.SetBool("isLaunched", false);
     }
@@ -207,6 +224,7 @@ public class CritterBehaviour : WanderingBehaviour
         currentState = critterState.launched;
         launchCurDuration = launchMaxDuration;
         rbody.velocity = transform.forward * launchVelocity;
+        mHero.heldCritter = null;
         mAnim.SetBool("isLaunched", true);
     }
 
@@ -273,6 +291,19 @@ public class CritterBehaviour : WanderingBehaviour
         {
             mAnim.SetBool("isGrounded", true);
         }
+
+
+        //if (collision.gameObject.layer == 16)
+        //{
+        //    if (!isPenned)
+        //    {
+        //        if (collision.gameObject.TryGetComponent(out MonsterBehaviour monster))
+        //        {
+        //            monster.CatchTargetedCritter(this);
+        //        }
+        //    }
+        //}
+
     }
 
 
@@ -306,6 +337,25 @@ public class CritterBehaviour : WanderingBehaviour
             }
         }
 
+        //if (other.gameObject.layer == 17)
+        //{
+        //    if (other.transform.parent.gameObject.TryGetComponent(out MonsterBehaviour enemy))
+        //    {
+        //        enemy.AddToCritterList(this);
+        //    }
+        //}
+
+        //if (other.gameObject.layer == 16)
+        //{
+        //    if (other.transform.parent.gameObject.TryGetComponent(out MonsterBehaviour enemy))
+        //    {
+        //        if (heldByMonster == null && immuneToGrabsTimer<=0)
+        //        {
+        //            enemy.CatchTargetedCritter(this);
+        //        }
+        //    }
+        //}
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -328,6 +378,16 @@ public class CritterBehaviour : WanderingBehaviour
             }
         }
 
+        if (other.gameObject.layer == 16)
+        {
+            if (other.transform.parent.gameObject.TryGetComponent(out MonsterBehaviour enemy))
+            {
+                if (heldByMonster == null && immuneToGrabsTimer <= 0)
+                {
+                    enemy.CatchTargetedCritter(this);
+                }
+            }
+        }
     }
 
     private IEnumerator GetPenned()
@@ -335,8 +395,12 @@ public class CritterBehaviour : WanderingBehaviour
         isPenned = true;
         gameObject.layer = 14;
         patienceTimer = Random.Range(mCritterObject.patience - mCritterObject.patienceRange, mCritterObject.patience + mCritterObject.patienceRange);
+
         if (creaturePen==null)
         creaturePen = GameScoreManager.Instance.creaturePen;
+
+        if (creaturePen == null)
+            Debug.LogError("creaturePen pen in null");
 
         creaturePen.ScorePoint();
         transform.LookAt(creaturePen.transform.position);
@@ -378,12 +442,15 @@ public class CritterBehaviour : WanderingBehaviour
         mAnim.SetBool("isGrounded", false);
         mAnim.SetTrigger("Jump");
 
+        float cancelTimer = 2;
+
         RandomizeWanderDirection(Vector3.zero);
         Vector3 jumpDestination = creaturePen.transform.position + (wanderDirection * 10);
         transform.LookAt(jumpDestination);
-        while ((Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(jumpDestination.x, jumpDestination.z)) > 0.1f))
+        while ((Vector2.Distance(new Vector2(transform.position.x, transform.position.z), new Vector2(jumpDestination.x, jumpDestination.z)) > 0.1f) && cancelTimer > 0)
         {
             yield return new WaitForEndOfFrame();
+            cancelTimer -= Time.deltaTime;
             rbody.velocity = Vector3.zero;
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, jumpHeight, transform.position.z), 0.1f);
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(jumpDestination.x, transform.position.y, jumpDestination.z), 0.1f);

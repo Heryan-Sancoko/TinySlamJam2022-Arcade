@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 4539609030353818}
   - component: {fileID: 33326147604272928}
   - component: {fileID: 23071827658907874}
-  - component: {fileID: 7655167500115787867}
+  - component: {fileID: 5919698907850324271}
   m_Layer: 7
   m_Name: Rock_C_06_LOD0
   m_TagString: Untagged
@@ -234,8 +234,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7655167500115787867
-BoxCollider:
+--- !u!135 &5919698907850324271
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -245,8 +245,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.062684275, y: 0.059482817, z: 0.028287675}
-  m_Center: {x: 0.00031840056, y: -0.00043332102, z: 0.0129845}
+  m_Radius: 0.025
+  m_Center: {x: 0.0003184229, y: -0.00043332102, z: 0.0129845}
 --- !u!1 &1796362053449220
 GameObject:
   m_ObjectHideFlags: 0

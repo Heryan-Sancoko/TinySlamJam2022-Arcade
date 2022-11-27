@@ -19,7 +19,9 @@ public class MonsterBehaviour : WanderingBehaviour
     private monsterState currentState;
     [SerializeField]
     private List<CritterBehaviour> nearbyCritters = new List<CritterBehaviour>();
+    [SerializeField]
     private CritterBehaviour targetedCritter;
+    [SerializeField]
     private bool isHoldingTargetedCritter = false;
     [SerializeField]
     private Transform monsterHands;
@@ -29,10 +31,15 @@ public class MonsterBehaviour : WanderingBehaviour
 
     [SerializeField]
     private float maxLaunchTimer = 0.5f;
+    [SerializeField]
     private float curLaunchTimer;
     [SerializeField]
     private float launchspeed;
 
+    [SerializeField]
+    private float maxStunnedTime = 1;
+    [SerializeField]
+    private float curStunnedTime = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -68,6 +75,9 @@ public class MonsterBehaviour : WanderingBehaviour
         transform.LookAt(middle);
 
         currentState = monsterState.entering;
+
+        if (nearbyCritters != null)
+            nearbyCritters.Clear();
     }
 
     // Update is called once per frame
@@ -118,66 +128,72 @@ public class MonsterBehaviour : WanderingBehaviour
 
                 break;
             case monsterState.chasing:
-                if (targetedCritter != null)
+                if (!isHoldingTargetedCritter)
                 {
-                    if (targetedCritter == null || !isHoldingTargetedCritter)
+                    if (nearbyCritters.Count > 1)
                     {
-                        if (nearbyCritters.Count > 1)
+                        SearchForNearbyCritters();
+                    }
+                    else if (nearbyCritters.Count == 1)
+                    {
+                        targetedCritter = nearbyCritters[0];
+                        if (targetedCritter.isPenned || targetedCritter.gameObject == null || targetedCritter.heldByMonster != null && targetedCritter.heldByMonster != this)
                         {
-                            List<CritterBehaviour> critterlist = nearbyCritters.ToList();
-                            foreach (CritterBehaviour critter in critterlist)
-                            {
-                                if (critter.isPenned || critter.currentState == critterState.held || critter.gameObject==null)
-                                {
-                                    nearbyCritters.Remove(critter);
-                                }
-                                else
-                                {
-                                    if (targetedCritter == null)
-                                    {
-                                        targetedCritter = critter;
-                                    }
-                                    else
-                                    {
-                                        if (Vector3.Distance(critter.transform.position, transform.position) < Vector3.Distance(targetedCritter.transform.position, transform.position))
-                                        {
-                                            targetedCritter = critter;
-                                        }
-                                    }
-                                }
-                            }
-
-                            //targetedCritter = nearbyCritters.OrderBy(x => Vector2.Distance(transform.position, x.transform.position)).ToList()[0];
-                        }
-                        else if (nearbyCritters.Count == 1)
-                        {
-                            targetedCritter = nearbyCritters[0];
-                        }
-                        else if (nearbyCritters.Count == 0)
-                        {
+                            targetedCritter = null;
+                            nearbyCritters.Clear();
                             currentState = monsterState.wandering;
                         }
-
-                        Vector3 newDirection = Vector3.RotateTowards(transform.forward, (targetedCritter.transform.position - transform.position).normalized, (currentMoveSpeed * 3) * Time.deltaTime, 0.0f);
-                        transform.rotation = Quaternion.LookRotation(newDirection);
-
-                        rbody.velocity = transform.forward * currentMoveSpeed;
-
-                        if (Vector3.Distance(targetedCritter.transform.position, transform.position) < 3)
-                        {
-                            isHoldingTargetedCritter = true;
-                        }
-
+                    }
+                    else if (nearbyCritters.Count == 0)
+                    {
+                        currentState = monsterState.wandering;
                     }
 
+                    if (targetedCritter != null)
+                    {
+                        Vector3 newDirection = Vector3.RotateTowards(transform.forward, (targetedCritter.transform.position - transform.position).normalized, (currentMoveSpeed * 3) * Time.deltaTime, 0.0f);
+                        transform.rotation = Quaternion.LookRotation(newDirection);
+                    }
+                    else
+                    {
+                        currentState = monsterState.wandering;
+                        return;
+                    }
+
+                    rbody.velocity = transform.forward * currentMoveSpeed;
+
+                    if (Vector3.Distance(targetedCritter.transform.position, transform.position) < 3)
+                    {
+                        isHoldingTargetedCritter = true;
+                    }
+
+                }
+                
+                if (targetedCritter != null)
+                {
                     if (isHoldingTargetedCritter)
                     {
-                        targetedCritter.PickupCritter(false);
-                        targetedCritter.transform.position = monsterHands.transform.position;
-                        targetedCritter.transform.rotation = monsterHands.rotation;
-                        Vector3 middle = Vector3.zero;
-                        middle.y = transform.position.y;
-                        rbody.velocity = (transform.position - middle).normalized * currentMoveSpeed;
+                        if (targetedCritter.heldByMonster != this)
+                        {
+                            DropHeldCritter();
+                            return;
+                        }    
+
+                        //if (!targetedCritter.isPenned && targetedCritter.heldByMonster == this)
+                        //{
+                            targetedCritter.PickupCritter(this);
+                            targetedCritter.transform.position = monsterHands.transform.position;
+                            targetedCritter.transform.rotation = monsterHands.rotation;
+                            Vector3 middle = Vector3.zero;
+                            middle.y = transform.position.y;
+                            rbody.velocity = (transform.position - middle).normalized * currentMoveSpeed;
+                        //}
+                        //else
+                        //{
+                        //    Debug.LogError("DROPPING CRITTER");
+                        //    isHoldingTargetedCritter = false;
+                        //    DropHeldCritter();
+                        //}
                     }
 
                     //TODO: what happens when the monster takes a critter outside the screen?
@@ -196,37 +212,125 @@ public class MonsterBehaviour : WanderingBehaviour
                 }
                 break;
             case monsterState.grabbed:
-                if (targetedCritter != null)
+                if (mhero.heldMonster == this)
                 {
-                    targetedCritter.DropCritter();
-                    targetedCritter = null;
-                    nearbyCritters.Clear();
-                    isHoldingTargetedCritter = false;
+                    DropHeldCritter();
+                    transform.position = mhero.heldTransform.position;
+                    transform.rotation = mhero.heldTransform.rotation;
                 }
-                transform.position = mhero.heldTransform.position;
-                transform.rotation = mhero.heldTransform.rotation;
+                else
+                {
+                    currentState = monsterState.wandering;
+                }
                 break;
             case monsterState.launched:
+
+                DropHeldCritter();
+
+                gameObject.layer = 10;
                 mhero.heldMonster = null;
                 rbody.velocity = transform.forward * launchspeed;
                 curLaunchTimer -= Time.deltaTime;
 
                 if (curLaunchTimer <= 0)
                 {
+                    gameObject.layer = 8;
                     if (IsOutsideScreen())
                     {
                         SetUpMonster();
                     }
                     else
                     {
-                        currentState = monsterState.wandering;
+                        if (curStunnedTime > 0)
+                        {
+                            currentState = monsterState.stunned;
+                        }
+                        else
+                        {
+                            currentState = monsterState.wandering;
+                        }
                     }
                 }
+                break;
+            case monsterState.stunned:
+                curStunnedTime -= Time.deltaTime;
+                if (curStunnedTime <= 0)
+                    currentState = monsterState.wandering;
                 break;
             default:
                 break;
         }
 
+    }
+
+
+    private void SearchForNearbyCritters()
+    {
+        if (nearbyCritters.Count > 1)
+        {
+            List<CritterBehaviour> critterlist = nearbyCritters.ToList();
+            foreach (CritterBehaviour critter in critterlist)
+            {
+                if (critter == null)
+                {
+                    nearbyCritters.Remove(critter);
+                    continue;
+                }
+            
+                if (critter.isPenned || critter.gameObject == null || critter.heldByMonster != null && critter.heldByMonster != this)
+                {
+                    if (targetedCritter == critter)
+                    {
+                        targetedCritter = null;
+                    }
+            
+                    nearbyCritters.Remove(critter);
+                }
+            }
+        }
+        else
+        {
+            if (nearbyCritters[0] == null)
+            {
+                nearbyCritters.Clear();
+            }
+            else if (nearbyCritters[0].isPenned || nearbyCritters[0].gameObject == null || nearbyCritters[0].heldByMonster != null && nearbyCritters[0].heldByMonster != this)
+            {
+                if (targetedCritter == nearbyCritters[0])
+                {
+                    targetedCritter = null;
+                }
+
+                nearbyCritters.Clear();
+            }
+        }
+
+        if (nearbyCritters.Count > 1)
+            targetedCritter = nearbyCritters.OrderBy(x => Vector2.Distance(transform.position, x.transform.position)).ToList()[0];
+
+        if (nearbyCritters.Count == 0)
+        {
+            currentState = monsterState.wandering;
+            return;
+        }
+
+    }
+
+    public void DropHeldCritter()
+    {
+        Debug.LogError(gameObject.name + "Dropping critter!");
+        isHoldingTargetedCritter = false;
+        if (targetedCritter != null)
+        {
+            //targetedCritter.DropCritter();
+            targetedCritter = null;
+        }
+
+        if (currentState != monsterState.grabbed && currentState != monsterState.launched)
+        {
+            StunMe(0.5f);
+            currentState = monsterState.stunned;
+        }
     }
 
     public bool IsOutsideScreen()
@@ -236,7 +340,14 @@ public class MonsterBehaviour : WanderingBehaviour
 
     public void CatchTargetedCritter(CritterBehaviour critter)
     {
+        if (currentState == monsterState.stunned)
+            return;
+
+        if (mhero.heldCritter == critter)
+            mhero.DropCritter();
+
         targetedCritter = critter;
+        critter.PickupCritter(this);
         isHoldingTargetedCritter = true;
     }
 
@@ -245,6 +356,11 @@ public class MonsterBehaviour : WanderingBehaviour
         if (currentState == monsterState.launched)
             return;
 
+
+        if (mhero.heldMonster != null || mhero.heldCritter != null)
+            return;
+
+        mhero.heldMonster = this;
         gameObject.layer = 15;
         currentState = monsterState.grabbed;
     }
@@ -252,8 +368,9 @@ public class MonsterBehaviour : WanderingBehaviour
     public void LaunchEnemy()
     {
         currentState = monsterState.launched;
-        gameObject.layer = 8;
+        gameObject.layer = 10;
         curLaunchTimer = maxLaunchTimer;
+        mhero.heldMonster = null;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -262,23 +379,31 @@ public class MonsterBehaviour : WanderingBehaviour
         {
             MonsterBehaviour hitMonster = collision.gameObject.GetComponent<MonsterBehaviour>();
             LaunchEnemy();
-            Vector3 launchDir = transform.forward + (transform.position - collision.transform.position).normalized;
+            Vector3 launchDir = transform.forward + ((transform.position - collision.transform.position).normalized*0.5f);
             launchDir.y = 0;
             launchDir.Normalize();
 
             hitMonster.LaunchEnemy();
             hitMonster.transform.LookAt(hitMonster.transform.position + (transform.forward + (hitMonster.transform.position - transform.position).normalized).normalized * launchspeed);
 
+            StunMe(maxStunnedTime);
+            hitMonster.StunMe(maxStunnedTime);
+
             transform.LookAt(transform.position + (launchDir * launchspeed));
-
-
         }
+    }
+
+    public void StunMe(float newStunTime)
+    {
+        curStunnedTime = newStunTime; ;
     }
 
     public void AddToCritterList(CritterBehaviour newCritter)
     {
         gameObject.layer = 8;
-        nearbyCritters.Add(newCritter);
+
+        if (!nearbyCritters.Contains(newCritter))
+            nearbyCritters.Add(newCritter);
     }
 
     public void RemoveFromCritterList(CritterBehaviour lostCritter)

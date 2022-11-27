@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4872098390390872}
   - component: {fileID: 33896323644229690}
   - component: {fileID: 23600426104772586}
-  - component: {fileID: 4503012772697106230}
+  - component: {fileID: 3744013164218781343}
   m_Layer: 7
   m_Name: Fungus_A_02_LOD0
   m_TagString: Untagged
@@ -84,8 +84,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &4503012772697106230
-BoxCollider:
+--- !u!135 &3744013164218781343
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -95,8 +95,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.032739293, y: 0.03702942, z: 0.018903425}
-  m_Center: {x: 0.0028442568, y: -0.0015970597, z: 0.008480026}
+  m_Radius: 0.01
+  m_Center: {x: 0.0028442568, y: -0.0015970297, z: 0.008480004}
 --- !u!1 &1423711400913296
 GameObject:
   m_ObjectHideFlags: 0
